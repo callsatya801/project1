@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    MA Zip Codes
+{% endblock %}
+
+{% block body %}
+<h1>Show me the location details:</h1>
+<form action="{{ url_for('search') }}" method="post">
+        <input type="text" name="srchStr" placeholder="Search for City, State or Zip">
+        <button>Search</button>
+</form>
+{% if locations %}
+<h2>City, State (Zip Code) and #Check-in's</h2>
+<ul class="list-group">
+    {% for loc in locations %}
+
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        <a href="{{ url_for('location', location_id=loc.location_id) }}"> {{ loc.city }}, {{ loc.state }} ({{ loc.zipcode }})</a>
+        <span class="badge badge-primary badge-pill">{{ loc.zipcode }}</span>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+    <h2>Please search for a valid location to get location details</h2>
+{% endif %}
+{% endblock %}

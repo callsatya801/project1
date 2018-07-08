@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    MA Zip Codes
+{% endblock %}
+
+{% block body %}
+    <h1>Show me the location details:</h1>
+
+        <table class="table table-striped">
+        <thead>
+            <th scope="col">Location#</th>
+            <th scope="col">State</th>
+            <th scope="col">City</th>
+            <th scope="col">Zip Code</th>
+        </thead>
+        <tbody>
+        {% for loc in locations %}
+            <tr>
+                <th scope="row">{{ loc.location_id }}</th>
+                <td>{{ loc.state }}</td>
+                <td>{{ loc.city }}</td>
+                <td>{{ loc.zipcode }}</td>
+                <td><a href="{{ url_for('location', location_id=loc.location_id) }}" class="btn btn-info" role="button">Check Details</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

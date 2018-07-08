@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Location
+{% endblock %}
+
+{% block body %}
+    <h1>Location Details</h1>
+
+    <table class="table table-striped">
+        <thead>
+            <th scope="col">Location#</th>
+            <th scope="col">State</th>
+            <th scope="col">City</th>
+            <th scope="col">Zip Code</th>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ location.location_id }}</td>
+                <td>{{ location.state }}</td>
+                <td>{{ location.city }}</td>
+                <td>{{ location.zipcode }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+
+    <h2>Weather Conditions</h2>
+    <div>
+        {{weather}}
+    </div>
+
+{% endblock %}

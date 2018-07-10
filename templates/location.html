@@ -5,8 +5,13 @@
 {% endblock %}
 
 {% block body %}
-    <h1>Location Details</h1>
 
+    <h1>Location Details</h1>
+      <p>
+        <a href="{{ url_for('logout') }}" class="btn btn-info btn-lg">
+          <span class="glyphicon glyphicon-log-out"></span> Log out
+        </a>
+      </p>
     <table class="table table-striped">
         <thead>
             <th scope="col">Location#</th>
@@ -29,5 +34,11 @@
     <div>
         {{weather}}
     </div>
-
+    <form class="form-group" action="{{ url_for('location', location_id=location.location_id) }}" method="post">
+        <div class="form-group">
+          <label for="comment">Comment:</label>
+          <textarea class="form-control" rows="5" id="comment" name="comment"></textarea>
+        </div>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Check-In</button>
+    </form>
 {% endblock %}

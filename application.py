@@ -51,6 +51,19 @@ def existing_user(pUsername,pPassword):
     else:
         return True
 
+def checkin_user(pUsername,pComment,pLocationId):
+    print(f"Inside checkin_user method :{pUsername}")
+    #Extract UserID from User Table
+    l_uid = db.execute("SELECT user_id, username FROM users WHERE username = :uname", {"uname": pUsername}).fetchall()
+    #l_uid = 4
+    #print(f" User ID: {l_uid.user_id}, UserName: {l_uid.username}")
+    print(f" User ID: {l_uid[0][0]} UserName:{l_uid[0][1]}")
+    # check if l_uid is Not None
+    if l_uid is not None:
+        db.execute("INSERT INTO location_checkin (user_id, location_id, comments, checkin_time) VALUES (:user_id, :location_id,:comments,current_timestamp)",
+            {"user_id": int(l_uid[0][0]), "location_id": pLocationId,"comments": pComment})
+        db.commit()
+
 
 @app.route('/')
 def index():
@@ -63,6 +76,7 @@ def register():
     print("registration page")
     #return "registration page"
     message = None
+    messageType=None
     if request.method == 'POST':
         userName=request.form.get("inputUsername")
         pWord = request.form.get("inputPassword")
@@ -70,11 +84,13 @@ def register():
 
         if existing_user(userName,pWord):
             message = 'User already Exists - Please use different UserName. Existing User? Pleae Login.'
+            messageType="E"
         else:
             print("Successful user creation - redirect to login page with success message")
             message = 'User Registration- Successful. Please login.'
+            messageType="S"
 
-    return render_template('register.html', message=message)
+    return render_template('register.html', message=message, messageType=messageType,log_user=session.get('loginUser',None))
 
 
 
@@ -82,6 +98,7 @@ def register():
 def login():
     #print(f"inside Login - method {request.method} - with loginUser:{session['loginUser']}")
     message = None
+    messageType=None
     if request.method == 'POST':
         userName=request.form.get("inputUsername")
         pWord = request.form.get("inputPassword")
@@ -93,7 +110,8 @@ def login():
             #return render_template('search.html')
         else:
             message = 'Invalid username/password - New User? Please Register.'
-            return render_template('login.html', message=message)
+            messageType="E"
+            return render_template('login.html', message=message, messageType=messageType,log_user=session.get('loginUser',None))
 
     if request.method == 'GET' and  session.get('loginUser',None) is not None :
         #print(f"Before redirecting to Search Page - loginUser {session['loginUser']}")
@@ -102,7 +120,7 @@ def login():
     else:
         #print(f"Before redirecting to Login Page - loginUser {session['loginUser']}")
         print(f"Before redirecting to Login Page - loginUser")
-        return render_template('login.html')
+        return render_template('login.html',log_user=session.get('loginUser',None))
 
 @app.route('/logout')
 def logout():
@@ -115,6 +133,7 @@ def search():
     # Validate UserLogged-in before able to search
     #print(f"User is Logged-in with User:{session['loginUser']}")
     print(f"User is Logged-in with User:{session.get('loginUser',None)}")
+
     if session.get('loginUser',None) is None:
            print("User not Logged-in. Redirecting to Login-page")
            return redirect(url_for('login'))
@@ -124,8 +143,10 @@ def search():
     locations=None
     if request.method == "POST":
         searchStr = request.form.get("srchStr")
-        locations = db.execute("SELECT zipcode, city, state, population, latitude, longitude, location_id, (select count(*) from location_checkin lc, users u where u.user_id = lc.user_id and u.username=:pUsername and l.location_id = lc.location_id) checkin_count FROM location l where upper(zipcode||city||state) like '%'||upper(:x)||'%' order by city",{"pUsername": session.get('loginUser',None), "x": searchStr}).fetchall()
-    return render_template("search.html", locations=locations)
+        #locations = db.execute("SELECT zipcode, city, state, population, latitude, longitude, location_id, (select count(*) from location_checkin lc, users u where u.user_id = lc.user_id and u.username=:pUsername and l.location_id = lc.location_id) checkin_count FROM location l where upper(zipcode||city||state) like '%'||upper(:x)||'%' order by city",{"pUsername": session.get('loginUser',None), "x": searchStr}).fetchall()
+        locations = db.execute("SELECT zipcode, city, state, population, latitude, longitude, location_id, (select count(*) from location_checkin lc where l.location_id = lc.location_id) checkin_count FROM location l where upper(zipcode||city||state) like '%'||upper(:x)||'%' order by city"
+        ,{ "x": searchStr}).fetchall()
+    return render_template("search.html", locations=locations, log_user=session.get('loginUser',None) )
 
 
 @app.route("/location/<int:location_id>", methods=["GET", "POST"])
@@ -136,11 +157,17 @@ def location(location_id):
            print("User not Logged-in. Redirecting to Login-page")
            return redirect(url_for('login'))
 
+    if request.method == 'POST':
+        comment=request.form.get("comment")
+        print(f"Comment Txt: {comment}, by user: {session.get('loginUser',None)}" )
+        checkin_user(session.get('loginUser',None),comment,location_id)
+        print('User Checked-in Successfully !')
+
     """Lists details about a single location."""
     # Make sure location exists.
-    loc = db.execute("SELECT zipcode, city, state, population, latitude, longitude, location_id FROM location WHERE location_id = :id", {"id": location_id}).fetchone()
+    loc = db.execute("SELECT zipcode, city, state, population, latitude, longitude, location_id, (select count(*) from location_checkin lc where lc.location_id = l.location_id) count_checkin FROM location l WHERE location_id = :id", {"id": location_id}).fetchone()
     if loc is None:
-        return render_template("error.html", message="No such Location.")
+        return render_template("error.html", message="No such Location.", log_user=session.get('loginUser',None))
 
     # Get the location specific Weather Details from darksky API
     queryUrl = f"https://api.darksky.net/forecast/c5ec3ef072177608a06f858bc9544f05/{loc.latitude},{loc.longitude}"
@@ -148,12 +175,16 @@ def location(location_id):
     current = query["currently"]
 
     # Get the check-in comments on this Location
-    c_comments = db.execute("SELECT lc.comments, lc.checkin_time, u.username from location_checkin lc, users u where u.user_id = lc.user_id and  lc.location_id = :loc_id",{"loc_id": location_id).fetchall()
+    c_comments = db.execute("SELECT lc.comments, lc.checkin_time, u.username from location_checkin lc, users u where u.user_id = lc.user_id and  lc.location_id = :loc_id"
+    ,{"loc_id": location_id}).fetchall()
+    print(f"comments:{c_comments}")
 
     # Is current User Checked-in
-    curr_checkin = db.execute("SELECT 'x' from location_checkin lc, users u where u.user_id = lc.user_id and u.username=:pUsername and l.location_id = :loc_id",{"pUsername": session.get('loginUser',None), "loc_id": location_id}).fetchall()
+    curr_checkin = db.execute("SELECT 'x' from location_checkin lc, users u where u.user_id = lc.user_id and u.username=:pUsername and lc.location_id = :loc_id"
+    ,{"pUsername": session.get('loginUser',None), "loc_id": location_id}).rowcount
 
-    return render_template("location.html", location=loc, weather=current, c_comments=c_comments, is_current_checkin=curr_checkin )
+    print(f"curr_checkin:{curr_checkin}")
+    return render_template("location.html", location=loc, weather=current, c_comments=c_comments, is_current_checkin=curr_checkin, log_user=session.get('loginUser',None) )
 
 #API Access: If users make a GET request to your website’s /api/<zip> route,
 # where <zip> is a ZIP code, your website should return a JSON response containing (at a minimum)

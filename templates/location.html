@@ -1,44 +1,70 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Location
+    Location : {{ location.city }}
 {% endblock %}
 
 {% block body %}
 
-    <h1>Location Details</h1>
-      <p>
-        <a href="{{ url_for('logout') }}" class="btn btn-info btn-lg">
-          <span class="glyphicon glyphicon-log-out"></span> Log out
-        </a>
-      </p>
-    <table class="table table-striped">
-        <thead>
-            <th scope="col">Location#</th>
-            <th scope="col">State</th>
-            <th scope="col">City</th>
-            <th scope="col">Zip Code</th>
-        </thead>
-        <tbody>
-            <tr>
-                <td>{{ location.location_id }}</td>
-                <td>{{ location.state }}</td>
-                <td>{{ location.city }}</td>
-                <td>{{ location.zipcode }}</td>
-            </tr>
-        </tbody>
-    </table>
+<h1>Location Details</h1>
+<div class="row">
+    <div class="col">
+        <table class="table table-striped">
+            <thead>
+                <th scope="col">Location#</th>
+                <th scope="col">State</th>
+                <th scope="col">City</th>
+                <th scope="col">Zip Code</th>
+                <th scope="col">Population</th>
+                <th scope="col"># Check-ins</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ location.location_id }}</td>
+                    <td>{{ location.state }}</td>
+                    <td>{{ location.city }}</td>
+                    <td>{{ location.zipcode }}</td>
+                    <td>{{ location.population }}</td>
+                    <td>{{ location.count_checkin }}</td>
+                </tr>
+            </tbody>
+        </table>
 
-
-    <h2>Weather Conditions</h2>
-    <div>
-        {{weather}}
-    </div>
-    <form class="form-group" action="{{ url_for('location', location_id=location.location_id) }}" method="post">
-        <div class="form-group">
-          <label for="comment">Comment:</label>
-          <textarea class="form-control" rows="5" id="comment" name="comment"></textarea>
+        <h2>Weather Conditions : {{weather.summary}}</h2>
+        <div>
+            <table class="table table-striped">
+                <tbody>
+                    {% for key, value in weather.items() %}
+                    <tr>
+                        <td>{{key|capitalize}} : <b>{{value}}</b></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Check-In</button>
-    </form>
+    </div>
+    <div class="col">
+        {%if is_current_checkin == 0 %}
+        <div>
+            <form class="form-group" action="{{ url_for('location', location_id=location.location_id) }}" method="post">
+                <div class="form-group">
+                    <label for="comment">Comment:</label>
+                    <textarea class="form-control" rows="5" id="comment" name="comment"></textarea>
+                </div>
+                <button class="btn btn-lg btn-primary btn-block" type="submit">Check-In</button>
+            </form>
+        </div>
+        {% endif %}
+
+        <h2>User Comments:</h2>
+        <ul class="list-group">
+            {% for cmts in c_comments %}
+
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                @ {{ cmts.username }} - {{cmts.checkin_time}}: {{cmts.comments}}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
 {% endblock %}

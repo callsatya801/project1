@@ -18,7 +18,7 @@ CREATE TABLE location_checkin (
     checkin_id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(user_id),
     location_id INTEGER REFERENCES location(location_id),
-    comments VARCHAR NOT NULL,
+    comments VARCHAR ,
     checkin_time TIMESTAMP NOT NULL
 );
 

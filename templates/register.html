@@ -1,35 +1,47 @@
 {% extends "layout.html" %}
 
-{% block title %}
-    Login
-{% endblock %}
+{% block title %} Login {% endblock %}
 
 {% block body %}
-    <h1>Register using Username and Password</h1>
-   <div class="container">
+<h3>Register using Username and Password</h3>
+<div class="container">
     {%if message %}
-    <div class="alert alert-danger" role="alert">
-      {{message}}
-    </div>
+     {%if messageType=='E' %}
+      <div class="alert alert-danger" role="alert">
+        {{message}}
+      </div>
     {% endif %}
-  <form class="form-group" action="{{ url_for('register') }}" method="post">
-      <div class="text-center mb-4">
-        <img class="mb-4" src="{{ url_for('static', filename='images/clouds.png') }}" alt="Clouds" width="150" height="72">
-        <h1 class="h3 mb-3 font-weight-normal">Login</h1>
+    {%if  messageType=='S' %}
+      <div class="alert alert-success" role="alert">
+        {{message}}
       </div>
+    {% endif %}
 
-      <div class="form-group">
-        <input type="text" name="inputUsername" class="form-control" placeholder="Username" required autofocus>
-        <label for="inputUsername">Username</label>
-      </div>
+    {% endif %}
+    <div class="card bg-light mb-3" style="max-width: 18rem;">
+        <div class="card-header">
+            <h3 class="h3 mb-3 font-weight-normal">Register</h3>
+            <img class="mb-4" src="{{ url_for('static', filename='images/clouds.png') }}" alt="Clouds" width="100" height="40">
+        </div>
+        <div class="card-body">
 
-      <div class="form-group">
-        <input type="password" name="inputPassword" class="form-control" placeholder="Password" required>
-        <label for="inputPassword">Password</label>
-      </div>
+            <form class="form-group" action="{{ url_for('register') }}" method="post">
 
-      <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
-      <a href="{{ url_for('login') }}" class="btn btn-info btn-lg"> login </a>
-    </form>
+                <div class="form-group">
+                    <input type="text" name="inputUsername" class="form-control" placeholder="Username" required autofocus>
+                    <label for="inputUsername">Username</label>
+                </div>
+
+                <div class="form-group">
+                    <input type="password" name="inputPassword" class="form-control" placeholder="Password" required>
+                    <label for="inputPassword">Password</label>
+                </div>
+
+                <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
+                <hr>
+
+                <a href="{{ url_for('login') }}" class="btn btn-info btn-lg">Existing User? Login </a>
+            </form>
+        </div>
     </div>
-{% endblock %}
+    {% endblock %}

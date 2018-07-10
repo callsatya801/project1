@@ -1,36 +1,40 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Login
+  Login
 {% endblock %}
 
 {% block body %}
-    <h1>User has to Login to perform Search and get location details</h1>
-   <div class="container">
+<h2>Login to perform Search and get location details</h2>
+<div class="container">
     {%if message %}
     <div class="alert alert-danger" role="alert">
-      {{message}}
+        {{message}}
     </div>
     {% endif %}
-  <form class="form-group" action="{{url_for('login')}}" method="post">
-      <div class="text-center mb-4">
-        <img class="mb-4" src="{{ url_for('static', filename='images/clouds.png') }}" alt="Clouds" width="150" height="72">
-        <h1 class="h3 mb-3 font-weight-normal">Login</h1>
-      </div>
 
-      <div class="form-group">
-        <input type="text" name="inputUsername" class="form-control" placeholder="Username" required autofocus>
-        <label for="inputUsername">Username</label>
-      </div>
+    <div class="card bg-light mb-3" style="max-width: 18rem;">
+        <div class="card-header">
+            <h3 class="h3 mb-3 font-weight-normal">Login</h3>
+            <img class="mb-4" src="{{ url_for('static', filename='images/clouds.png') }}" alt="Clouds" width="100" height="40">
+        </div>
+        <div class="card-body">
+            <form class="form-group" action="{{url_for('login')}}" method="post">
 
-      <div class="form-group">
-        <input type="password" name="inputPassword" class="form-control" placeholder="Password" required>
-        <label for="inputPassword">Password</label>
-      </div>
+                <div class="form-group">
+                    <input type="text" name="inputUsername" class="form-control" placeholder="Username" required autofocus>
+                    <label for="inputUsername">Username</label>
+                </div>
 
-      <button class="btn btn-lg btn-primary btn-block" type="submit">Login</button>
-      <a href="{{ url_for('register') }}" class="btn btn-info btn-lg"> Register </a>
+                <div class="form-group">
+                    <input type="password" name="inputPassword" class="form-control" placeholder="Password" required>
+                    <label for="inputPassword">Password</label>
+                </div>
 
-    </form>
+                <button class="btn btn-lg btn-primary btn-block" type="submit">Login</button>
+                <hr>
+                <a href="{{ url_for('register') }}" class="btn btn-info btn-lg">New User? Register </a>
+            </form>
+        </div>
     </div>
-{% endblock %}
+    {% endblock %}

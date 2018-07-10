@@ -5,15 +5,23 @@
 {% endblock %}
 
 {% block body %}
-<h1>Please search for a location to get location details</h1>
-      <p>
-        <a href="{{ url_for('logout') }}" class="btn btn-info btn-lg">
-          <span class="glyphicon glyphicon-log-out"></span> Log out
-        </a>
-      </p>
+<h3>Please search for a location to get location details</h3>
 <form action="{{ url_for('search') }}" method="post">
-        <input type="text" name="srchStr" placeholder="Search for City, State or Zip">
-        <button>Search</button>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="input-group">
+                <input type="text" class="form-control" name="srchStr" placeholder="Search for City, State or Zip">
+                <span class="input-group-btn">
+        <button class="btn btn-default" type="button">Search</button>
+      </span>
+            </div>
+            <!-- /input-group -->
+        </div>
+        <!-- /.col-lg-6 -->
+    </div>
+    <!-- /.row -->
+
 </form>
 {% if locations %}
 <h2>City, State (Zip Code) and #Check-in's</h2>
@@ -26,5 +34,4 @@
     </li>
     {% endfor %}
 </ul>
-{% endif %}
-{% endblock %}
+{% endif %} {% endblock %}

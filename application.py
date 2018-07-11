@@ -206,8 +206,10 @@ def location(location_id):
     tz = timezone(timezoneStr)
     #sDt = datetime.datetime.fromtimestamp(int(query["currently"]["time"]),tz=tz).strftime('%Y-%m-%d %H:%M:%S')
     sDt = datetime.datetime.fromtimestamp(int(query["currently"]["time"]),tz=tz).strftime('%a (%d.%b.%Y) %I:%M %p')
-    dailyData = query["daily"]["data"]
     print(f"date time converted {sDt} Timezone: {timezone}" )
+
+    #### Daily Data #############
+    dailyData = query["daily"]["data"]
 
     #Added Day of the Week to show Daily Low/High Temp against WeekDay
     for i in range (len(dailyData)):
@@ -216,6 +218,17 @@ def location(location_id):
         weekDt =  dt.strftime('%d.%b')
         dailyData[i]["weekDay"]=weekDay
         dailyData[i]["weekDate"]=weekDt
+
+
+    #### Hourly Data #############
+    hourlyData = query["hourly"]["data"]
+
+    #Added Day of the Week and Time
+    for i in range (len(hourlyData)):
+        dt = datetime.datetime.fromtimestamp(int(hourlyData[i]["time"]),tz=tz)
+        strTime =dt.strftime('%I %p %a') # eg: 12 pm
+        hourlyData[i]["hourlyTime"]=strTime
+
 
     # Get the check-in comments on this Location
     c_comments = db.execute("SELECT lc.comments, to_char(lc.checkin_time,'DD-MON-YY HH24:MI am') checkin_time , u.username from location_checkin lc, users u where u.user_id = lc.user_id and  lc.location_id = :loc_id order by lc.checkin_time desc"
@@ -227,7 +240,8 @@ def location(location_id):
     ,{"pUsername": session.get('loginUser',None), "loc_id": location_id}).rowcount
 
     print(f"curr_checkin:{curr_checkin}")
-    return render_template("location_3c.html", location=loc, weather=current, c_comments=c_comments, is_current_checkin=curr_checkin, log_user=session.get('loginUser',None), qTime=sDt, dailyData=dailyData )
+    return render_template("location_3c.html", location=loc, weather=current, c_comments=c_comments, is_current_checkin=curr_checkin, log_user=session.get('loginUser',None)
+    , qTime=sDt, dailyData=dailyData, hourlyData=hourlyData[:8] )
 
 #API Access: If users make a GET request to your website’s /api/<zip> route,
 # where <zip> is a ZIP code, your website should return a JSON response containing (at a minimum)

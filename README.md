@@ -44,4 +44,7 @@ If the requested ZIP code isn’t in your database, your website should return a
 >> used abort() function to return 404 error.
 
 References:
->> Clouds/Checked-in images are downladed from https://pixabay.com - available for free download once login.
+>> Clouds/Check-in images are downladed from https://pixabay.com - available for free download once login.
+
+Notes:
+Added Houly/Daily Forecast

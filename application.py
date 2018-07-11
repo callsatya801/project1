@@ -9,6 +9,7 @@ import requests
 import datetime
 import json
 from pytz import timezone
+from hashlib import sha1
 
 app = Flask(__name__)
 
@@ -32,8 +33,12 @@ def valid_login(pUsername,pPassword):
     print("Inside valid_login method :")
     #session['loginUser']=pUsername
     #return True
+    # Get the sha1 Hash of the user input password
+    pHash = sha1(b"{pPassword}").hexdigest()
+    print(f" Hashed password {pHash}")
+
     # Make sure valid user exists
-    if db.execute("SELECT 'x' FROM users WHERE username = :uname and password = :pwd", {"uname": pUsername, "pwd":pPassword}).rowcount == 0:
+    if db.execute("SELECT 'x' FROM users WHERE username = :uname and password = :pwd", {"uname": pUsername, "pwd":pHash}).rowcount == 0:
         session.pop('loginUser', None)
         return False
     else:
@@ -45,9 +50,11 @@ def existing_user(pUsername,pPassword):
     print(f"Inside existing_user method :{pUsername}")
 
     if db.execute("SELECT 'x' FROM users WHERE username = :uname", {"uname": pUsername}).rowcount == 0:
-           # Create User
+        # Create User
+        # Hash the password before storing into the DB
+        pHash = sha1(b"{pPassword}").hexdigest()
         db.execute("INSERT INTO users (username, password) VALUES (:username, :password)",
-            {"username": pUsername, "password": pPassword})
+            {"username": pUsername, "password": pHash})
         db.commit()
         return False
     else:
@@ -164,7 +171,7 @@ def search():
         if len(searchStr) ==0:
             warnMessage="Please provide a valid search criteria."
         else:
-            locations = db.execute("SELECT zipcode, city, state, population, latitude, longitude, location_id, (select count(*) from location_checkin lc where l.location_id = lc.location_id) checkin_count FROM location l where upper(zipcode||city||state) like '%'||upper(:x)||'%' order by city"
+            locations = db.execute("SELECT zipcode, city, state, population, latitude, longitude, location_id, (select count(*) from location_checkin lc where l.location_id = lc.location_id) checkin_count FROM location l where upper(zipcode||city||state) like '%'||upper(:x)||'%' order by city,state"
             ,{ "x": searchStr}).fetchall()
             if not locations :
                 warnMessage="Sorry! We do not find any locations that match your search criteria. Try for other locations."
@@ -205,8 +212,10 @@ def location(location_id):
     #Added Day of the Week to show Daily Low/High Temp against WeekDay
     for i in range (len(dailyData)):
         dt = datetime.datetime.fromtimestamp(int(dailyData[i]["time"]),tz=tz)
-        weekDay =dt.strftime('%a %d.%b')
+        weekDay =dt.strftime('%a')
+        weekDt =  dt.strftime('%d.%b')
         dailyData[i]["weekDay"]=weekDay
+        dailyData[i]["weekDate"]=weekDt
 
     # Get the check-in comments on this Location
     c_comments = db.execute("SELECT lc.comments, to_char(lc.checkin_time,'DD-MON-YY HH24:MI am') checkin_time , u.username from location_checkin lc, users u where u.user_id = lc.user_id and  lc.location_id = :loc_id order by lc.checkin_time desc"

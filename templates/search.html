@@ -11,7 +11,7 @@
     </div>
     {% endif %}
 
-    <div class="row justify-content-md-center">
+    <div class="row justify-content-md-center padding-top">
         <div class="col-lg-6">
           <form action="{{ url_for('search') }}" method="post">
             <div class="input-group padding-top">
@@ -28,6 +28,7 @@
     <!-- /.row -->
 
 {% if locations %}
+<div class="container bg-primary text-white">
 <label><b>City, State (Zip Code) and #Check-in's</b></label>
 <ul class="list-group">
     {% for loc in locations %}
@@ -38,4 +39,5 @@
     </li>
     {% endfor %}
 </ul>
+</div>
 {% endif %} {% endblock %}

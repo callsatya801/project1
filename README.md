@@ -3,7 +3,8 @@
 Web Programming with Python and JavaScript
 
 Registration: Users should be able to register for your website, providing (at minimum) a username and password.
->> login.html: Users will be redirected to Login page if user is not logged-in. Added conditional redirection to login page
+>> register.html: Users will be redirected to Login page if user is not logged-in and given option to navigate to Registration.
+>> Used hashlib.sha1 to encrypt password. Use encription to compare the user input.
 
 Login: Users, once registered, should be able to log in to your website with their username and password.
 >>On successful login the user is redirected to search page - to search for weather forecast
@@ -41,3 +42,6 @@ API Access: If users make a GET request to your website’s /api/<zip> route, wh
 
 If the requested ZIP code isn’t in your database, your website should return a 404 error.
 >> used abort() function to return 404 error.
+
+References:
+>> Clouds/Checked-in images are downladed from https://pixabay.com - available for free download once login.

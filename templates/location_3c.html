@@ -1,29 +1,34 @@
 {% extends "layout.html" %} {% block title %} Location : {{ location.city }} {% endblock %} {% block body %}
 <p class="text-right"> <a href="{{ url_for('search') }}" class="btn btn-info btn-sm" role="button">Back to Search </a></p>
+<div class="p-3 mb-2 bg-info text-white">
 <table class="table table-striped">
     <thead>
-        <th scope="col">Location#</th>
-        <th scope="col">State</th>
         <th scope="col">City</th>
+        <th scope="col">State</th>
         <th scope="col">Zip Code</th>
         <th scope="col">Population</th>
+        <th scope="col">Latitude</th>
+        <th scope="col">Longitude</th>
         <th scope="col"># Check-ins</th>
     </thead>
     <tbody>
         <tr>
-            <td>{{ location.location_id }}</td>
-            <td>{{ location.state }}</td>
             <td>{{ location.city }}</td>
+            <td>{{ location.state }}</td>
             <td>{{ location.zipcode }}</td>
             <td>{{ location.population }}</td>
+            <td>{{ location.latitude }}</td>
+            <td>{{ location.longitude }}</td>
             <td>{{ location.count_checkin }}</td>
         </tr>
     </tbody>
 </table>
+</div>
+
 <div class="row">
     <div class="col">
         <div class="sidebar">
-            <div class="container">
+            <div class="container p-3 mb-2 bg-primary text-white">
                 <div class="sidebar-about">
                     <p class="lead">{{qTime}}</p>
                     <h1>
@@ -73,7 +78,7 @@
                     <tbody>
                       {% for daily in dailyData %}
                         <tr>
-                            <td><b>{{daily.weekDay}}</b></td>
+                            <td><b>{{daily.weekDay}}<br>{{daily.weekDate}}</br></b></td>
                             <td> {{daily.summary}}</td>
                             <td>min <b>{{daily.temperatureLow| round|int}}&#x2109;</b></td>
                             <td>max <b>{{daily.temperatureHigh| round|int}}&#x2109;</b></td>

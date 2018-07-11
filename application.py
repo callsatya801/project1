@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, session, render_template, request, redirect, url_for, abort
+from flask import Flask, session, render_template, request, redirect, url_for, abort, jsonify
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -210,15 +210,16 @@ def api(zipcode):
     # return all rows as a JSON array of objects
     #items = [dict(zip([key[0] for key in cursor.description], row)) for row in loc]
     locDict={
-        'place_name': loc.city,
-        'state': loc.state,
-        'latitude': float(loc.latitude),
-        'longitude': float(loc.longitude),
-        'zip': loc.zipcode,
-        'population': loc.population,
-        'check_ins': loc.checkin_count
+        "place_name": loc.city,
+        "state": loc.state,
+        "latitude": float(loc.latitude),
+        "longitude": float(loc.longitude),
+        "zip": loc.zipcode,
+        "population": loc.population,
+        "check_ins": loc.checkin_count
     }
 
     #locJson = json.dumps(locDict, indent = 2)
-    return json.dumps(locDict, indent = 2)
+    return     jsonify(locDict)
+    #return json.dumps(locDict, indent = 2)
     #return render_template("api.html", locJson=ppr, zipCode=zipcode)

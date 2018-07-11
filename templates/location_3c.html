@@ -75,8 +75,8 @@
                         <tr>
                             <td><b>{{daily.weekDay}}</b></td>
                             <td> {{daily.summary}}</td>
-                            <td>min <b>{{daily.temperatureLow| round|int}} &#x2109;</b></td>
-                            <td>max <b>{{daily.temperatureHigh| round|int}} &#x2109;</b></td>
+                            <td>min <b>{{daily.temperatureLow| round|int}}&#x2109;</b></td>
+                            <td>max <b>{{daily.temperatureHigh| round|int}}&#x2109;</b></td>
                         </tr>
                       {% endfor %}
                     </tbody>
@@ -89,13 +89,12 @@
             <div>
                 <form class="form-group" action="{{ url_for('location', location_id=location.location_id) }}" method="post">
                     <div class="form-group">
-                       <label for="checkin"><b>Check-in</b></label>
+                       <label for="checkin"><b>Check-in with Comment</b></label>
                        <input type="image" src="{{ url_for('static', filename='images/check_in.png') }}" width="60" height="30"alt="Submit" name="checkin" value="checkin">
                         <hr></hr>
                         <label for="comment"><b>Comment:</b></label>
                         <textarea class="form-control" rows="5" id="comment" name="comment" placeholder="Please provide your comments"></textarea>
                     </div>
-                    <button class="btn btn-sm btn-primary btn-block" type="submit" name="checkin" value="comments">Save Comments</button>
                 </form>
             </div>
             {% else %}
@@ -106,8 +105,7 @@
                 </div>
             </div>
             {% endif %}
-
-            <h2>User Comments:</h2>
+            <label><b>User Comments:</b></label>
             <ul class="list-group">
                 {% for cmts in c_comments %}
 

@@ -5,7 +5,11 @@
 {% endblock %}
 
 {% block body %}
-
+ {%if message %}
+    <div class="alert alert-warning" role="alert">
+        {{message}}
+    </div>
+    {% endif %}
 
     <div class="row justify-content-md-center">
         <div class="col-lg-6">
@@ -24,7 +28,7 @@
     <!-- /.row -->
 
 {% if locations %}
-<h2>City, State (Zip Code) and #Check-in's</h2>
+<label><b>City, State (Zip Code) and #Check-in's</b></label>
 <ul class="list-group">
     {% for loc in locations %}
 

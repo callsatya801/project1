@@ -53,7 +53,7 @@ def existing_user(pUsername,pPassword):
     else:
         return True
 
-def checkin_user(pUsername,pLocationId):
+def submit_user_comment (pUsername,pLocationId):
     print(f"Inside checkin_user method :{pUsername}")
     #Extract UserID from User Table
     l_uid = db.execute("SELECT user_id, username FROM users WHERE username = :uname", {"uname": pUsername}).fetchall()
@@ -67,7 +67,7 @@ def checkin_user(pUsername,pLocationId):
         db.commit()
 
 
-def submit_user_comment(pUsername,pComment,pLocationId):
+def checkin_user(pUsername,pComment,pLocationId):
     print(f"Inside checkin_user method :{pUsername}")
     #Extract UserID from User Table
     l_uid = db.execute("SELECT user_id, username FROM users WHERE username = :uname", {"uname": pUsername}).fetchall()
@@ -156,13 +156,19 @@ def search():
 
     # Get the Search String - and query the locatation DB in zipcode, city, state columns.
     searchStr=""
+    warnMessage=None
     locations=None
     if request.method == "POST":
         searchStr = request.form.get("srchStr")
-        #locations = db.execute("SELECT zipcode, city, state, population, latitude, longitude, location_id, (select count(*) from location_checkin lc, users u where u.user_id = lc.user_id and u.username=:pUsername and l.location_id = lc.location_id) checkin_count FROM location l where upper(zipcode||city||state) like '%'||upper(:x)||'%' order by city",{"pUsername": session.get('loginUser',None), "x": searchStr}).fetchall()
-        locations = db.execute("SELECT zipcode, city, state, population, latitude, longitude, location_id, (select count(*) from location_checkin lc where l.location_id = lc.location_id) checkin_count FROM location l where upper(zipcode||city||state) like '%'||upper(:x)||'%' order by city"
-        ,{ "x": searchStr}).fetchall()
-    return render_template("search.html", locations=locations, log_user=session.get('loginUser',None) )
+        searchStr = searchStr.strip()
+        if len(searchStr) ==0:
+            warnMessage="Please provide a valid search criteria."
+        else:
+            locations = db.execute("SELECT zipcode, city, state, population, latitude, longitude, location_id, (select count(*) from location_checkin lc where l.location_id = lc.location_id) checkin_count FROM location l where upper(zipcode||city||state) like '%'||upper(:x)||'%' order by city"
+            ,{ "x": searchStr}).fetchall()
+            if not locations :
+                warnMessage="Sorry! We do not find any locations that match your search criteria. Try for other locations."
+    return render_template("search.html", locations=locations, log_user=session.get('loginUser',None), message=warnMessage )
 
 
 @app.route("/location/<int:location_id>", methods=["GET", "POST"])
@@ -174,22 +180,14 @@ def location(location_id):
            return redirect(url_for('login'))
 
     if request.method == 'POST':
-        chk_in_OR_cmt = request.form.get("checkin")
-        print(f"Button Pressed is  Txt: {chk_in_OR_cmt}" )
-
-        if chk_in_OR_cmt == "checkin":
-            checkin_user(session.get('loginUser',None),location_id)
-            print('User Checked-in Successfully !')
-
-        if chk_in_OR_cmt == "comments":
-            comment=request.form.get("comment")
-            print(f"Comment Txt: {comment}, by user: {session.get('loginUser',None)}" )
-            #checkin_user(session.get('loginUser',None),comment,location_id)
-            print('User Checked-in Successfully !')
+       comment=request.form.get("comment")
+       print(f"Comment Txt: {comment}, by user: {session.get('loginUser',None)}" )
+       checkin_user(session.get('loginUser',None),comment,location_id)
+       print('User Checked-in Successfully !')
 
     """Lists details about a single location."""
     # Make sure location exists.
-    loc = db.execute("SELECT zipcode, city, state, population, latitude, longitude, location_id, (select count(*) from location_checkin lc where lc.location_id = l.location_id) count_checkin FROM location l WHERE location_id = :id", {"id": location_id}).fetchone()
+    loc = db.execute("SELECT zipcode, city, state, to_char(population,'999,999,999,999,999') population, latitude, longitude, location_id, (select count(*) from location_checkin lc where lc.location_id = l.location_id) count_checkin FROM location l WHERE location_id = :id", {"id": location_id}).fetchone()
     if loc is None:
         return render_template("error.html", message="No such Location.", log_user=session.get('loginUser',None))
 
@@ -211,7 +209,7 @@ def location(location_id):
         dailyData[i]["weekDay"]=weekDay
 
     # Get the check-in comments on this Location
-    c_comments = db.execute("SELECT lc.comments, lc.checkin_time, u.username from location_checkin lc, users u where u.user_id = lc.user_id and  lc.location_id = :loc_id order by lc.checkin_time desc"
+    c_comments = db.execute("SELECT lc.comments, to_char(lc.checkin_time,'DD-MON-YY HH24:MI am') checkin_time , u.username from location_checkin lc, users u where u.user_id = lc.user_id and  lc.location_id = :loc_id order by lc.checkin_time desc"
     ,{"loc_id": location_id}).fetchall()
     print(f"comments:{c_comments}")
 

@@ -10,13 +10,18 @@
         <!--link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" -->
     </head>
     <body>
-        <div class="jumbotron">
-            <h2 class="display-4">Project 1: Rainy Day</h2>
-            {% if log_user is not none %}
-            <p class="text-right"> <b>{{log_user}}</b> <a href="{{ url_for('logout') }}" class="btn btn-info btn-lg" role="button">   Log out    </a></p>
+
+             <!-- Image and text -->
+<nav class="navbar navbar-light bg-light">
+  <a class="navbar-brand display-5"  href="#">
+    <img src="{{ url_for('static', filename='images/clouds.png') }}" width="60" height="30" class="d-inline-block align-top" alt="">
+    Weather Forecast - “Powered by Dark Sky”
+  </a>
+   {% if log_user is not none %}
+            <p class="text-right"> <b>Username: {{log_user}}</b> <a href="{{ url_for('logout') }}" class="btn btn-info btn-sm" role="button">   Log out    </a></p>
             {% endif %}
-        </div>
-        <div class="container">
+</nav>
+        <div class="container-fluid">
             {% block body %}
             {% endblock %}
         </div>

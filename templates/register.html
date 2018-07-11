@@ -1,30 +1,19 @@
-{% extends "layout.html" %}
-
-{% block title %} Login {% endblock %}
-
-{% block body %}
-<h3>Register using Username and Password</h3>
+{% extends "layout.html" %} {% block title %} Login {% endblock %} {% block body %}
 <div class="container">
-    {%if message %}
-     {%if messageType=='E' %}
-      <div class="alert alert-danger" role="alert">
+    {%if message %} {%if messageType=='E' %}
+    <div class="alert alert-danger" role="alert">
         {{message}}
-      </div>
-    {% endif %}
-    {%if  messageType=='S' %}
-      <div class="alert alert-success" role="alert">
+    </div>
+    {% endif %} {%if messageType=='S' %}
+    <div class="alert alert-success" role="alert">
         {{message}}
-      </div>
-    {% endif %}
-
-    {% endif %}
-    <div class="card bg-light mb-3" style="max-width: 18rem;">
-        <div class="card-header">
-            <h3 class="h3 mb-3 font-weight-normal">Register</h3>
-            <img class="mb-4" src="{{ url_for('static', filename='images/clouds.png') }}" alt="Clouds" width="100" height="40">
-        </div>
+    </div>
+    {% endif %} {% endif %}
+    <div class="card" style="width: 18rem;">
+        <img class="card-img-top" src="{{ url_for('static', filename='images/clouds.png') }}" alt="Weather Forecast">
         <div class="card-body">
-
+            <h5 class="card-title">Register</h5>
+            <p class="card-text">Register using Username and Password</p>
             <form class="form-group" action="{{ url_for('register') }}" method="post">
 
                 <div class="form-group">
@@ -37,11 +26,12 @@
                     <label for="inputPassword">Password</label>
                 </div>
 
-                <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
+                <button class="btn btn-sm btn-primary btn-block" type="submit">Register</button>
                 <hr>
 
-                <a href="{{ url_for('login') }}" class="btn btn-info btn-lg">Existing User? Login </a>
+                <a href="{{ url_for('login') }}" class="btn btn-info btn-sm">Existing User? Login </a>
             </form>
         </div>
     </div>
-    {% endblock %}
+</div>
+{% endblock %}

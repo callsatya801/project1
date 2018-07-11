@@ -53,7 +53,21 @@ def existing_user(pUsername,pPassword):
     else:
         return True
 
-def checkin_user(pUsername,pComment,pLocationId):
+def checkin_user(pUsername,pLocationId):
+    print(f"Inside checkin_user method :{pUsername}")
+    #Extract UserID from User Table
+    l_uid = db.execute("SELECT user_id, username FROM users WHERE username = :uname", {"uname": pUsername}).fetchall()
+    #l_uid = 4
+    #print(f" User ID: {l_uid.user_id}, UserName: {l_uid.username}")
+    print(f" User ID: {l_uid[0][0]} UserName:{l_uid[0][1]}")
+    # check if l_uid is Not None
+    if l_uid is not None:
+        db.execute("INSERT INTO location_checkin (user_id, location_id, checkin_time) VALUES (:user_id, :location_id, current_timestamp)",
+            {"user_id": int(l_uid[0][0]), "location_id": pLocationId})
+        db.commit()
+
+
+def submit_user_comment(pUsername,pComment,pLocationId):
     print(f"Inside checkin_user method :{pUsername}")
     #Extract UserID from User Table
     l_uid = db.execute("SELECT user_id, username FROM users WHERE username = :uname", {"uname": pUsername}).fetchall()
@@ -160,10 +174,18 @@ def location(location_id):
            return redirect(url_for('login'))
 
     if request.method == 'POST':
-        comment=request.form.get("comment")
-        print(f"Comment Txt: {comment}, by user: {session.get('loginUser',None)}" )
-        checkin_user(session.get('loginUser',None),comment,location_id)
-        print('User Checked-in Successfully !')
+        chk_in_OR_cmt = request.form.get("checkin")
+        print(f"Button Pressed is  Txt: {chk_in_OR_cmt}" )
+
+        if chk_in_OR_cmt == "checkin":
+            checkin_user(session.get('loginUser',None),location_id)
+            print('User Checked-in Successfully !')
+
+        if chk_in_OR_cmt == "comments":
+            comment=request.form.get("comment")
+            print(f"Comment Txt: {comment}, by user: {session.get('loginUser',None)}" )
+            #checkin_user(session.get('loginUser',None),comment,location_id)
+            print('User Checked-in Successfully !')
 
     """Lists details about a single location."""
     # Make sure location exists.
@@ -177,13 +199,19 @@ def location(location_id):
     current = query["currently"]
     timezoneStr = query["timezone"]
     tz = timezone(timezoneStr)
-    sDt = datetime.datetime.fromtimestamp(int(query["currently"]["time"]),tz=tz).strftime('%Y-%m-%d %H:%M:%S')
+    #sDt = datetime.datetime.fromtimestamp(int(query["currently"]["time"]),tz=tz).strftime('%Y-%m-%d %H:%M:%S')
+    sDt = datetime.datetime.fromtimestamp(int(query["currently"]["time"]),tz=tz).strftime('%a (%d.%b.%Y) %I:%M %p')
+    dailyData = query["daily"]["data"]
+    print(f"date time converted {sDt} Timezone: {timezone}" )
 
-    print(f"date time converted {sDt} Timezone: {timezone}")
-
+    #Added Day of the Week to show Daily Low/High Temp against WeekDay
+    for i in range (len(dailyData)):
+        dt = datetime.datetime.fromtimestamp(int(dailyData[i]["time"]),tz=tz)
+        weekDay =dt.strftime('%a %d.%b')
+        dailyData[i]["weekDay"]=weekDay
 
     # Get the check-in comments on this Location
-    c_comments = db.execute("SELECT lc.comments, lc.checkin_time, u.username from location_checkin lc, users u where u.user_id = lc.user_id and  lc.location_id = :loc_id"
+    c_comments = db.execute("SELECT lc.comments, lc.checkin_time, u.username from location_checkin lc, users u where u.user_id = lc.user_id and  lc.location_id = :loc_id order by lc.checkin_time desc"
     ,{"loc_id": location_id}).fetchall()
     print(f"comments:{c_comments}")
 
@@ -192,7 +220,7 @@ def location(location_id):
     ,{"pUsername": session.get('loginUser',None), "loc_id": location_id}).rowcount
 
     print(f"curr_checkin:{curr_checkin}")
-    return render_template("location.html", location=loc, weather=current, c_comments=c_comments, is_current_checkin=curr_checkin, log_user=session.get('loginUser',None), qTime=sDt )
+    return render_template("location_3c.html", location=loc, weather=current, c_comments=c_comments, is_current_checkin=curr_checkin, log_user=session.get('loginUser',None), qTime=sDt, dailyData=dailyData )
 
 #API Access: If users make a GET request to your website’s /api/<zip> route,
 # where <zip> is a ZIP code, your website should return a JSON response containing (at a minimum)

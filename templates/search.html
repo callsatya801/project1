@@ -5,24 +5,24 @@
 {% endblock %}
 
 {% block body %}
-<h3>Please search for a location to get location details</h3>
-<form action="{{ url_for('search') }}" method="post">
 
-    <div class="row">
+
+    <div class="row justify-content-md-center">
         <div class="col-lg-6">
-            <div class="input-group">
-                <input type="text" class="form-control" name="srchStr" placeholder="Search for City, State or Zip">
+          <form action="{{ url_for('search') }}" method="post">
+            <div class="input-group padding-top">
+                <input type="text" class="form-control input-lg"  name="srchStr" placeholder="Search for City, State or Zip for Weather Forecast">
                 <span class="input-group-btn">
          <button class="btn btn-default">Search</button>
       </span>
             </div>
             <!-- /input-group -->
+            </form>
         </div>
         <!-- /.col-lg-6 -->
     </div>
     <!-- /.row -->
 
-</form>
 {% if locations %}
 <h2>City, State (Zip Code) and #Check-in's</h2>
 <ul class="list-group">

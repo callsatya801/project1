@@ -1,0 +1,121 @@
+{% extends "layout.html" %} {% block title %} Location : {{ location.city }} {% endblock %} {% block body %}
+<p class="text-right"> <a href="{{ url_for('search') }}" class="btn btn-info btn-sm" role="button">Back to Search </a></p>
+<table class="table table-striped">
+    <thead>
+        <th scope="col">Location#</th>
+        <th scope="col">State</th>
+        <th scope="col">City</th>
+        <th scope="col">Zip Code</th>
+        <th scope="col">Population</th>
+        <th scope="col"># Check-ins</th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{ location.location_id }}</td>
+            <td>{{ location.state }}</td>
+            <td>{{ location.city }}</td>
+            <td>{{ location.zipcode }}</td>
+            <td>{{ location.population }}</td>
+            <td>{{ location.count_checkin }}</td>
+        </tr>
+    </tbody>
+</table>
+<div class="row">
+    <div class="col">
+        <div class="sidebar">
+            <div class="container">
+                <div class="sidebar-about">
+                    <p class="lead">{{qTime}}</p>
+                    <h1>
+                        {{weather.temperature}} &#x2109;
+                    </h1>
+                    <p class="lead">{{weather.summary}}</p>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <div class="col">
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <td>Dew Point</td>
+                                    <td><b>{{weather.dewPoint}}&#x2109;</b></td>
+                                </tr>
+                                <tr>
+                                    <td>Humidity:</td>
+                                    <td><b>{{ (weather.humidity * 100) | round|int }}%</b></td>
+                                </tr>
+                                <tr>
+                                    <td>Windspeed </td>
+                                    <td><b>{{ weather.windSpeed  }}mph</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                </nav>
+                </div>
+                <h5>More Detials: </h5>
+                <table class="table table-striped">
+                    <tbody>
+                        {% for key, value in weather.items() %}
+                        <tr>
+                            <td>{{key|capitalize}} : <b>{{value}}</b></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="container">
+                <h4>Daily Forecast: </h4>
+                <table class="table table-striped">
+                    <tbody>
+                      {% for daily in dailyData %}
+                        <tr>
+                            <td><b>{{daily.weekDay}}</b></td>
+                            <td> {{daily.summary}}</td>
+                            <td>min <b>{{daily.temperatureLow| round|int}} &#x2109;</b></td>
+                            <td>max <b>{{daily.temperatureHigh| round|int}} &#x2109;</b></td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="col">
+            {%if is_current_checkin == 0 %}
+            <div>
+                <form class="form-group" action="{{ url_for('location', location_id=location.location_id) }}" method="post">
+                    <div class="form-group">
+                       <label for="checkin"><b>Check-in</b></label>
+                       <input type="image" src="{{ url_for('static', filename='images/check_in.png') }}" width="60" height="30"alt="Submit" name="checkin" value="checkin">
+                        <hr></hr>
+                        <label for="comment"><b>Comment:</b></label>
+                        <textarea class="form-control" rows="5" id="comment" name="comment" placeholder="Please provide your comments"></textarea>
+                    </div>
+                    <button class="btn btn-sm btn-primary btn-block" type="submit" name="checkin" value="comments">Save Comments</button>
+                </form>
+            </div>
+            {% else %}
+               <div class="thumbnail">
+                <img src="{{ url_for('static', filename='images/check_in.png') }}" alt="Checked-in"  width="60" height="30">
+                <div class="caption">
+                  <p>You have Cheked-in @ this location</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <h2>User Comments:</h2>
+            <ul class="list-group">
+                {% for cmts in c_comments %}
+
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    @ {{ cmts.username }} - {{cmts.checkin_time}}: {{cmts.comments}}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endblock %}

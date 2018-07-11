@@ -4,9 +4,11 @@ from flask import Flask, session, render_template, request, redirect, url_for, a
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
+from datetime import datetime, timedelta
 import requests
 import datetime
 import json
+from pytz import timezone
 
 app = Flask(__name__)
 
@@ -173,6 +175,12 @@ def location(location_id):
     queryUrl = f"https://api.darksky.net/forecast/c5ec3ef072177608a06f858bc9544f05/{loc.latitude},{loc.longitude}"
     query = requests.get(queryUrl).json()
     current = query["currently"]
+    timezoneStr = query["timezone"]
+    tz = timezone(timezoneStr)
+    sDt = datetime.datetime.fromtimestamp(int(query["currently"]["time"]),tz=tz).strftime('%Y-%m-%d %H:%M:%S')
+
+    print(f"date time converted {sDt} Timezone: {timezone}")
+
 
     # Get the check-in comments on this Location
     c_comments = db.execute("SELECT lc.comments, lc.checkin_time, u.username from location_checkin lc, users u where u.user_id = lc.user_id and  lc.location_id = :loc_id"
@@ -184,7 +192,7 @@ def location(location_id):
     ,{"pUsername": session.get('loginUser',None), "loc_id": location_id}).rowcount
 
     print(f"curr_checkin:{curr_checkin}")
-    return render_template("location.html", location=loc, weather=current, c_comments=c_comments, is_current_checkin=curr_checkin, log_user=session.get('loginUser',None) )
+    return render_template("location.html", location=loc, weather=current, c_comments=c_comments, is_current_checkin=curr_checkin, log_user=session.get('loginUser',None), qTime=sDt )
 
 #API Access: If users make a GET request to your website’s /api/<zip> route,
 # where <zip> is a ZIP code, your website should return a JSON response containing (at a minimum)

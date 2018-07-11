@@ -7,6 +7,7 @@
 {% block body %}
 <p class="text-right">  <a href="{{ url_for('search') }}" class="btn btn-info btn-lg" role="button">Back to Search </a></p>
 <h1>Location Details</h1>
+<text>“Powered by Dark Sky”</text>
 <div class="row">
     <div class="col">
         <table class="table table-striped">
@@ -30,8 +31,9 @@
             </tbody>
         </table>
 
-        <h2>Weather Conditions : {{weather.summary}}</h2>
-        <div>
+        <div class="container">
+        <h4>Weather Forecast as of "{{qTime}}": {{weather.summary}} @{{weather.temperature}} &#x2109; </h4>
+
             <table class="table table-striped">
                 <tbody>
                     {% for key, value in weather.items() %}
